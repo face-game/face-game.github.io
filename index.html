@@ -1,0 +1,62 @@
+<!--
+ * public/index.html
+ * Originally created 9/29/2017 by Perry Naseck (DaAwesomeP)
+ * https://github.com/DaAwesomeP/face-game
+ *
+ * Copyright 2018-present Perry Naseck (DaAwesomeP)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>The Face Game</title>
+    <link rel="stylesheet" href="/assets/css/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/fonts.css">
+    <style type="text/css">
+      body {
+        background: #FCF9D5 url('/img/45-degree-fabric-dark.png');
+      }
+      .gameFont {
+        font-family: 'Gloria Hallelujah', 'Arial', 'Calibri', 'Open Sans', 'Ubuntu', cursive;
+      }
+      #p5sketch {
+        border: 20px outset #FFCC00;
+        padding: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="display-4 gameFont">The Face Game<p class="lead">Just move your head around and do what is says to do, ok?</p></h1>
+      <div class="d-flex justify-content-center">
+        <div id="p5sketch"></div>
+      </div>
+      <h5 class="gameFont mt-3">Having trouble?</h5>
+      <ul>
+        <li class="gameFont">Try moving your face closer or farther from the camera.</li>
+        <li class="gameFont">Look straight in the direction of the camera.</li>
+        <li class="gameFont">Make sure that your beautiful face is well-lit and and there nothing behind you is brighter than your face (ex. lights, windows, screens, etc.).</li>
+      </ul>
+      <p class="text-secondary text-center"><small>By playing this game you consent to your picture being taken, stored publicly online, and used, shared, and reporduced in any way without your permission, credit, or acknowledgement.</small></p>
+    </div>
+<!--    <script src="/assets/js/jquery/jquery.slim.min.js"></script>-->
+<!--    <script src="/assets/js/bootstrap/bootstrap.bundle.min.js"></script>-->
+    <script src="/assets/js/p5/p5.js"></script>
+    <script src="/assets/js/p5/addons/p5.dom.js"></script>
+    <script src="/assets/js/clmtrackr/clmtrackr.min.js"></script>
+    <script src="/js/sketch.js"></script>
+  </body>
+</html>
