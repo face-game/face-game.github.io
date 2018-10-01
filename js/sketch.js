@@ -73,6 +73,7 @@ var sketch = function sketch(s) {
 
   var init = function init() {
     var cameraReady = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    var callback = arguments.length > 1 ? arguments[1] : undefined;
     player = {
       ended: false,
       loc: false,
@@ -82,9 +83,11 @@ var sketch = function sketch(s) {
       snapped: [],
       sent: false,
       remoteAwake: false,
-      content: false
+      content: false,
+      debug: false
     };
     wakeupRemote();
+    getContent(callback);
   };
 
   var levels = [{
@@ -116,8 +119,7 @@ var sketch = function sketch(s) {
   }];
 
   s.setup = function setup() {
-    init();
-    getContent(function () {
+    init(false, function () {
       canvasBg = s.loadImage('/img/45-degree-fabric-light.png');
 
       for (var i in levels) {
@@ -152,7 +154,16 @@ var sketch = function sketch(s) {
 
   s.draw = function draw() {
     s.imageMode(s.CORNERS);
-    s.background(s.color(252, 249, 213)); // s.background(canvasBg)
+    s.background(s.color(252, 249, 213));
+
+    if (player.debug) {
+      s.push();
+      s.translate(s.width, 0);
+      s.scale(-1.0, 1.0);
+      s.image(videoInput.get(), 0, 0, s.width, s.height);
+      s.pop();
+    } // s.background(canvasBg)
+
 
     s.textFont('Gloria Hallelujah', 22);
 
@@ -241,7 +252,7 @@ var sketch = function sketch(s) {
           var request = new XMLHttpRequest();
           request.open('POST', 'https://face-game.glitch.me/api/0/submit', true);
           request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-          request.send(JSON.stringify(sendData));
+          if (!player.debug) request.send(JSON.stringify(sendData));
           player.sent = true;
         }
       }
@@ -249,11 +260,14 @@ var sketch = function sketch(s) {
   };
 
   s.mousePressed = function mousePressed() {
-    if (player.sent) init(player.cameraReady);
+    if (player.sent) init(player.cameraReady, function () {});
   };
 
   s.keyPressed = function keyPressed() {
-    if (player.sent) init(player.cameraReady);
+    if (player.sent) init(player.cameraReady, function () {});else if (s.keyCode === 68 && !player.debug) {
+      console.log('debug mode');
+      player.debug = true;
+    }
   };
 };
 
