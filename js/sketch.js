@@ -38,6 +38,7 @@ var sketch = function sketch(s) {
       if (request.status >= 200 && request.status < 400) {
         var lines = request.responseText.split('\n');
         player.content = lines[s.int(s.random(lines.length - 1))];
+        if (player.debug) console.log('content', player.content);
         callback();
       }
     };
@@ -60,6 +61,7 @@ var sketch = function sketch(s) {
         if (data === {
           status: 200
         }) player.remoteAwake = true;else player.remoteAwake = false;
+        if (player.debug) console.log('wakeupRemote', data);
       }
     };
 
@@ -73,7 +75,9 @@ var sketch = function sketch(s) {
 
   var init = function init() {
     var cameraReady = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    var callback = arguments.length > 1 ? arguments[1] : undefined;
+    var debug = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    var callback = arguments.length > 2 ? arguments[2] : undefined;
+    if (player.debug) console.log('init');
     player = {
       ended: false,
       loc: false,
@@ -84,10 +88,18 @@ var sketch = function sketch(s) {
       sent: false,
       remoteAwake: false,
       content: false,
-      debug: false
+      debug: debug
     };
     wakeupRemote();
-    getContent(callback);
+    getContent(function () {
+      for (var i in levels) {
+        levels[i].img.loaded = s.loadImage(levels[i].img.src);
+        levels[i].cursor.loaded = s.loadImage(levels[i].cursor.src);
+        levels[i].img.counter = s.loadImage("https://face-game.github.io/face-game-content/level-".concat(s.int(i) + 1, "/").concat(player.content, ".png"));
+      }
+
+      callback();
+    });
   };
 
   var levels = [{
@@ -119,15 +131,8 @@ var sketch = function sketch(s) {
   }];
 
   s.setup = function setup() {
-    init(false, function () {
+    init(false, false, function () {
       canvasBg = s.loadImage('/img/45-degree-fabric-light.png');
-
-      for (var i in levels) {
-        levels[i].img.loaded = s.loadImage(levels[i].img.src);
-        levels[i].cursor.loaded = s.loadImage(levels[i].cursor.src);
-        levels[i].img.counter = s.loadImage("https://face-game.github.io/face-game-content/level-".concat(s.int(i) + 1, "/").concat(player.content, ".png"));
-      }
-
       s.createCanvas(640, 480);
       s.textSize(50);
       videoInput = s.createCapture({
@@ -168,6 +173,7 @@ var sketch = function sketch(s) {
     s.textFont('Gloria Hallelujah', 22);
 
     if (!player.cameraReady) {
+      if (player.debug) console.log('camera ready');
       s.textAlign(s.CENTER, s.CENTER);
       s.text('Your browser will prompt you to allow this website to access your camera. Please allow access to play the game.', s.width / 4, s.height / 4, s.width / 2, s.height / 2);
     } else {
@@ -190,6 +196,7 @@ var sketch = function sketch(s) {
           player.distFrom = Math.hypot(player.coords[0] - currLevel.loc[0], player.coords[1] - currLevel.loc[1]);
 
           if (player.distFrom <= currLevel.dist) {
+            if (player.debug) console.log('levelup');
             player.snapped.push(videoInput.get());
             player.level++;
             wakeupRemote();
@@ -236,9 +243,11 @@ var sketch = function sketch(s) {
         s.text('Click or press any key to play again!', s.width / 2, s.height - 5);
 
         if (!player.sent) {
+          if (player.debug) console.log('sending');
           var sendData = {
             images: [],
-            created: new Date()
+            created: new Date(),
+            userAgent: window.navigator.userAgent
           };
 
           for (var _i2 in player.snapped) {
@@ -248,6 +257,7 @@ var sketch = function sketch(s) {
             });
           }
 
+          if (player.debug) console.log('sendData', sendData);
           wakeupRemote();
           var request = new XMLHttpRequest();
           request.open('POST', 'https://face-game.glitch.me/api/0/submit', true);
@@ -260,11 +270,13 @@ var sketch = function sketch(s) {
   };
 
   s.mousePressed = function mousePressed() {
-    if (player.sent) init(player.cameraReady, function () {});
+    if (player.debug) console.log('mousepress');
+    if (player.sent) init(player.cameraReady, player.debug, function () {});
   };
 
   s.keyPressed = function keyPressed() {
-    if (player.sent) init(player.cameraReady, function () {});else if (s.keyCode === 68 && !player.debug) {
+    if (player.debug) console.log('keypress');
+    if (player.sent) init(player.cameraReady, player.debug, function () {});else if (s.keyCode === 68 && !player.debug) {
       console.log('debug mode');
       player.debug = true;
     }
