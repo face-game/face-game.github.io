@@ -181,7 +181,10 @@ var sketch = function sketch(s) {
 
     s.textFont('Gloria Hallelujah', 22);
 
-    if (!player.cameraReady) {
+    if (navigator.userAgent.toLowerCase().search('phone') !== -1 || navigator.userAgent.toLowerCase().search('ipad') !== -1 || navigator.userAgent.toLowerCase().search('android') !== -1) {
+      s.textAlign(s.CENTER, s.CENTER);
+      s.text('Sorry, but the game only works on desktop or laptop computers! The game doesn\'t run well on phones and tablets.', s.width / 4, s.height / 4, s.width / 2, s.height / 2);
+    } else if (!player.cameraReady) {
       if (player.debug) console.log('not camera ready');
       s.textAlign(s.CENTER, s.CENTER);
       s.text('Your browser will prompt you to allow this website to access your camera. Please allow access to play the game.', s.width / 4, s.height / 4, s.width / 2, s.height / 2);
