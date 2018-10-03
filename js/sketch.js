@@ -1,6 +1,6 @@
 /* public/js/sketch.js
  * Originally created 9/29/2017 by Perry Naseck (DaAwesomeP)
- * https://github.com/DaAwesomeP/face-game
+ * https://github.com/face-game/face-game
  *
  * Copyright 2018-present Perry Naseck (DaAwesomeP)
  *
@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-/* global p5, clm, XMLHttpRequest */
+/* global p5, ml5, XMLHttpRequest */
 
 /* eslint no-unused-vars: ["error", { "varsIgnorePattern": "p5Runtime| }] */
 
@@ -26,7 +26,7 @@
 
 var sketch = function sketch(s) {
   var videoInput;
-  var ctracker;
+  var poseNet;
   var canvasBg;
   var player = {};
 
@@ -75,14 +75,18 @@ var sketch = function sketch(s) {
 
   var init = function init() {
     var cameraReady = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    var debug = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-    var callback = arguments.length > 2 ? arguments[2] : undefined;
+    var modelReady = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    var debug = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    var callback = arguments.length > 3 ? arguments[3] : undefined;
     if (player.debug) console.log('init');
     player = {
       ended: false,
       loc: false,
       coords: false,
       cameraReady: cameraReady,
+      modelReady: modelReady,
+      poses: [],
+      part: {},
       level: 1,
       snapped: [],
       sent: false,
@@ -103,7 +107,7 @@ var sketch = function sketch(s) {
   };
 
   var levels = [{
-    obj: 'Stick out your tongue and lick the lollipop',
+    obj: 'Stick out your tongue, turn, and lick the lollipop',
     loc: [65, 185],
     side: 0,
     dist: 40,
@@ -116,7 +120,7 @@ var sketch = function sketch(s) {
       size: [100, 100]
     }
   }, {
-    obj: 'Pucker your lips and kiss the puppy',
+    obj: 'Pucker your lips, turn, and kiss the puppy',
     loc: [575, 260],
     side: 1,
     dist: 40,
@@ -131,7 +135,7 @@ var sketch = function sketch(s) {
   }];
 
   s.setup = function setup() {
-    init(false, false, function () {
+    init(false, false, false, function () {
       canvasBg = s.loadImage('/img/45-degree-fabric-light.png');
       s.createCanvas(640, 480);
       s.textSize(50);
@@ -151,9 +155,12 @@ var sketch = function sketch(s) {
       });
       videoInput.size(640, 480);
       videoInput.hide();
-      ctracker = new clm.tracker();
-      ctracker.init();
-      ctracker.start(videoInput.elt);
+      poseNet = ml5.poseNet(videoInput, function () {
+        player.modelReady = true;
+      });
+      poseNet.on('pose', function (results) {
+        player.poses = results;
+      });
     });
   };
 
@@ -173,18 +180,40 @@ var sketch = function sketch(s) {
     s.textFont('Gloria Hallelujah', 22);
 
     if (!player.cameraReady) {
-      if (player.debug) console.log('camera ready');
+      if (player.debug) console.log('not camera ready');
       s.textAlign(s.CENTER, s.CENTER);
       s.text('Your browser will prompt you to allow this website to access your camera. Please allow access to play the game.', s.width / 4, s.height / 4, s.width / 2, s.height / 2);
+    } else if (!player.modelReady) {
+      if (player.debug) console.log('show loading');
+      s.textAlign(s.CENTER, s.CENTER);
+      s.text('Loading face detection model...', s.width / 4, s.height / 4, s.width / 2, s.height / 2);
     } else {
       var currLevel = levels[player.level - 1];
 
       if (!player.ended) {
-        player.loc = ctracker.getCurrentPosition();
+        player.part = {
+          score: 0
+        };
+        player.loc = false;
+
+        for (var i in player.poses) {
+          var noseScore = player.poses[i].pose.keypoints.find(function (key) {
+            return key.part === 'nose';
+          });
+
+          if (noseScore.score > player.part.score) {
+            player.part = noseScore;
+            player.loc = [player.part.position.x, player.part.position.y];
+          }
+        }
+
+        s.fill(0);
+        s.noStroke();
+        s.textSize(22);
         s.textAlign(s.LEFT, s.TOP);
         s.text("Level ".concat(player.level), 20, 5);
-        s.textAlign(s.LEFT, s.TOP);
-        s.text(currLevel.obj, s.width - (20 + s.textWidth(currLevel.obj)), 5);
+        s.textAlign(s.RIGHT, s.TOP);
+        s.text(currLevel.obj, s.width / 4, 5, 3 * s.width / 4);
         s.textAlign(s.CENTER, s.BOTTOM);
         s.textSize(18);
         s.text('Move your head in real life to control the game', s.width / 2, s.height - 5);
@@ -192,7 +221,7 @@ var sketch = function sketch(s) {
         s.image(currLevel.img.loaded, currLevel.loc[0], currLevel.loc[1], currLevel.img.size[0], currLevel.img.size[0]);
 
         if (player.loc !== false) {
-          player.coords = [640 - player.loc[62][0], player.loc[62][1]];
+          player.coords = [640 - player.loc[0], player.loc[1]];
           player.distFrom = Math.hypot(player.coords[0] - currLevel.loc[0], player.coords[1] - currLevel.loc[1]);
 
           if (player.distFrom <= currLevel.dist) {
@@ -210,26 +239,26 @@ var sketch = function sketch(s) {
       } else {
         s.imageMode(s.CORNER);
 
-        for (var i in player.snapped) {
-          if (levels[i].side === 1) {
+        for (var _i in player.snapped) {
+          if (levels[_i].side === 1) {
             s.push();
             s.translate(s.width / 2, 0);
             s.scale(-1.0, 1.0);
           }
 
-          s.image(player.snapped[i], 0, i * (s.height / 2), s.width / 2, s.height / 2);
-          if (levels[i].side === 1) s.pop();
+          s.image(player.snapped[_i], 0, _i * (s.height / 2), s.width / 2, s.height / 2);
+          if (levels[_i].side === 1) s.pop();
         }
 
-        for (var _i in levels) {
-          if (levels[_i].side === 0) {
+        for (var _i2 in levels) {
+          if (levels[_i2].side === 0) {
             s.push();
             s.translate(s.width, 0);
             s.scale(-1.0, 1.0);
-            s.image(levels[_i].img.counter, 0, _i * (s.height / 2), s.width / 2, s.height / 2);
+            s.image(levels[_i2].img.counter, 0, _i2 * (s.height / 2), s.width / 2, s.height / 2);
             s.pop();
           } else {
-            s.image(levels[_i].img.counter, s.width / 2, _i * (s.height / 2), s.width / 2, s.height / 2);
+            s.image(levels[_i2].img.counter, s.width / 2, _i2 * (s.height / 2), s.width / 2, s.height / 2);
           }
         }
 
@@ -250,10 +279,10 @@ var sketch = function sketch(s) {
             userAgent: window.navigator.userAgent
           };
 
-          for (var _i2 in player.snapped) {
+          for (var _i3 in player.snapped) {
             sendData.images.push({
-              level: s.int(_i2) + 1,
-              img: player.snapped[_i2].canvas.toDataURL()
+              level: s.int(_i3) + 1,
+              img: player.snapped[_i3].canvas.toDataURL()
             });
           }
 
@@ -271,12 +300,12 @@ var sketch = function sketch(s) {
 
   s.mousePressed = function mousePressed() {
     if (player.debug) console.log('mousepress');
-    if (player.sent) init(player.cameraReady, player.debug, function () {});
+    if (player.sent) init(player.cameraReady, player.modelReady, player.debug, function () {});
   };
 
   s.keyPressed = function keyPressed() {
     if (player.debug) console.log('keypress');
-    if (player.sent) init(player.cameraReady, player.debug, function () {});else if (s.keyCode === 68 && !player.debug) {
+    if (player.sent) init(player.cameraReady, player.modelReady, player.debug, function () {});else if (s.keyCode === 68 && !player.debug) {
       console.log('debug mode');
       player.debug = true;
     }
