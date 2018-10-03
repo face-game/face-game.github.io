@@ -107,7 +107,7 @@ var sketch = function sketch(s) {
   };
 
   var levels = [{
-    obj: 'Stick out your tongue, turn, and lick the lollipop',
+    obj: 'Stick out your tongue, turn your head, and lick the lollipop',
     loc: [65, 185],
     side: 0,
     dist: 40,
@@ -120,7 +120,7 @@ var sketch = function sketch(s) {
       size: [100, 100]
     }
   }, {
-    obj: 'Pucker your lips, turn, and kiss the puppy',
+    obj: 'Pucker your lips, turn your head, and kiss the puppy',
     loc: [575, 260],
     side: 1,
     dist: 40,
