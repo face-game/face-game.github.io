@@ -140,17 +140,7 @@ var sketch = function sketch(s) {
       s.createCanvas(640, 480);
       s.textSize(50);
       videoInput = s.createCapture({
-        video: {
-          mandatory: {
-            minWidth: 320,
-            minHeight: 240,
-            maxWidth: 640,
-            maxHeight: 480
-          },
-          optional: [{
-            minFrameRate: 10
-          }]
-        },
+        video: true,
         audio: false
       }, function () {
         player.cameraReady = true;
