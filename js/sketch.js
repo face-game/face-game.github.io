@@ -140,12 +140,23 @@ var sketch = function sketch(s) {
       s.createCanvas(640, 480);
       s.textSize(50);
       videoInput = s.createCapture({
-        video: true,
+        video: {
+          width: {
+            min: 320,
+            ideal: 640,
+            max: 640
+          },
+          height: {
+            min: 240,
+            ideal: 480,
+            max: 480
+          }
+        },
         audio: false
       }, function () {
         player.cameraReady = true;
-      });
-      videoInput.size(640, 480);
+      }); // videoInput.size(640, 480)
+
       videoInput.hide();
       poseNet = ml5.poseNet(videoInput, function () {
         player.modelReady = true;
@@ -174,6 +185,11 @@ var sketch = function sketch(s) {
     if (navigator.userAgent.toLowerCase().search('phone') !== -1 || navigator.userAgent.toLowerCase().search('ipad') !== -1 || navigator.userAgent.toLowerCase().search('android') !== -1) {
       s.textAlign(s.CENTER, s.CENTER);
       s.text('Sorry, but the game only works on desktop or laptop computers! The game doesn\'t run well on phones and tablets.', s.width / 4, s.height / 4, s.width / 2, s.height / 2);
+    } else if (navigator.userAgent.match(/(Version)\/(\d+)\.(\d+)(?:\.(\d+))?.*Safari/g) || navigator.userAgent.match(/(Edge)\/(\d+)(?:\.(\d+))?/g) || navigator.userAgent.match(/(MSIE) (\d+)(?:\.(\d+))?/g) || navigator.userAgent.match(/(Trident)\/(\d+)(?:\.(\d+))?/g)) {
+      // Safari match regex adjusted from
+      // https://jonlabelle.com/snippets/view/yaml/browser-user-agent-regular-expressions
+      s.textAlign(s.CENTER, s.CENTER);
+      s.text('Sorry, but the game doesn\'t work in Safari, Edge, or Internet Explorer! The game uses technology for face detection with cameras in the browser. Please try Mozilla Firefox, Google Chrome, or Opera.', s.width / 4, s.height / 4, s.width / 2, s.height / 2);
     } else if (!player.cameraReady) {
       if (player.debug) console.log('not camera ready');
       s.textAlign(s.CENTER, s.CENTER);
