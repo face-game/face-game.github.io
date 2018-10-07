@@ -287,7 +287,8 @@ var sketch = function sketch(s) {
           var sendData = {
             images: [],
             created: new Date(),
-            userAgent: window.navigator.userAgent
+            userAgent: window.navigator.userAgent,
+            devicePixelRatio: window.devicePixelRatio
           };
 
           for (var _i3 in player.snapped) {
