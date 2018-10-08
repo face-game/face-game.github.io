@@ -347,10 +347,11 @@ var sketch = function sketch(s) {
 
 
   s.mousePressed = function mousePressed() {
-    if (player.debug) console.log('mousepress'); // if (player.sent) init(player.cameraReady, player.modelReady, player.debug, () => {})
+    if (player.debug) console.log('mousepress', s.mouseX, s.mouseY); // if (player.sent) init(player.cameraReady, player.modelReady, player.debug, () => {})
 
-    if (s.mouseX >= s.width / 10 && s.mouseX <= 4 * s.width / 10 && s.mouseY >= s.height - 40 && s.mouseX <= s.height) {
+    if (s.mouseX >= s.width / 10 && s.mouseX <= 4 * s.width / 10 && s.mouseY >= s.height - 40 && s.mouseY <= s.height) {
       if (!player.sent && player.sendInit && player.ended) {
+        if (player.debug) console.log('caught send button');
         if (player.debug) console.log('sending');
         wakeupRemote();
         var request = new XMLHttpRequest();
@@ -359,8 +360,9 @@ var sketch = function sketch(s) {
         if (!player.debug) request.send(JSON.stringify(player.sendData));
         player.sent = true;
       }
-    } else if (s.mouseX >= 6 * s.width / 10 && s.mouseX <= 9 * s.width / 10 && s.mouseY >= s.height - 40 && s.mouseX <= s.height) {
+    } else if (s.mouseX >= 6 * s.width / 10 && s.mouseX <= 9 * s.width / 10 && s.mouseY >= s.height - 40 && s.mouseY <= s.height) {
       if (player.ended) {
+        if (player.debug) console.log('caught play again button');
         init(player.cameraReady, player.modelReady, player.debug, function () {});
       }
     }
