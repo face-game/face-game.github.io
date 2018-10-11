@@ -1,5 +1,5 @@
 /* public/js/sketch.js
- * Originally created 9/29/2017 by Perry Naseck (DaAwesomeP)
+ * Originally created 9/29/2018 by Perry Naseck (DaAwesomeP)
  * https://github.com/face-game/face-game
  *
  * Copyright 2018-present Perry Naseck (DaAwesomeP)
