@@ -301,7 +301,8 @@ var sketch = function sketch(s) {
         s.rect(6 * s.width / 10, s.height - 40, 3 * s.width / 10, 40);
         s.fill(255);
         s.stroke(0);
-        if (!player.sent) s.text('Submit my photos!', s.width / 4, s.height - 5);else s.text('Submitted!', s.width / 4, s.height - 5);
+        // if (!player.sent) s.text('Submit my photos!', s.width / 4, s.height - 5);else s.text('Submitted!', s.width / 4, s.height - 5);
+        s.text('Submissions closed', s.width / 4, s.height - 5);
         s.text('Play again!', 3 * s.width / 4, s.height - 5);
         player.sendData = {
           images: [],
@@ -352,13 +353,13 @@ var sketch = function sketch(s) {
     if (s.mouseX >= s.width / 10 && s.mouseX <= 4 * s.width / 10 && s.mouseY >= s.height - 40 && s.mouseY <= s.height) {
       if (!player.sent && player.sendInit && player.ended) {
         if (player.debug) console.log('caught send button');
-        if (player.debug) console.log('sending');
-        wakeupRemote();
-        var request = new XMLHttpRequest();
-        request.open('POST', 'https://face-game.glitch.me/api/0/submit', true);
-        request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-        if (!player.debug) request.send(JSON.stringify(player.sendData));
-        player.sent = true;
+        // if (player.debug) console.log('sending');
+        // wakeupRemote();
+        // var request = new XMLHttpRequest();
+        // request.open('POST', 'https://face-game.glitch.me/api/0/submit', true);
+        // request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+        // if (!player.debug) request.send(JSON.stringify(player.sendData));
+        // player.sent = true;
       }
     } else if (s.mouseX >= 6 * s.width / 10 && s.mouseX <= 9 * s.width / 10 && s.mouseY >= s.height - 40 && s.mouseY <= s.height) {
       if (player.ended) {
